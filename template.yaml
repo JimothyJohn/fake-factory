@@ -36,12 +36,6 @@ Resources:
           Properties:
             # !Sub is used to reference the variable within a longer string 
             Schedule: !Sub rate(${WriteInterval} minute)
-        ApiEvent:
-          Type: Api
-          Properties:
-            Path: /devices/{deviceId}
-            Method: get
-            RestApiId: !Ref TimestreamApi
       Policies:
         - Statement:
             - Effect: Allow
@@ -52,51 +46,6 @@ Resources:
               Action:
                 - timestream:DescribeEndpoints
               Resource: "*"
-
-  TimestreamApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: prod
-      OpenApiVersion: '3.0.1'
-      Cors:
-        AllowMethods: "'GET,OPTIONS'"
-        AllowHeaders: "'Content-Type'"
-        AllowOrigin: "'*'"
-      Definition:
-        openapi: '3.0.1'
-        info:
-          title: Timestream Query API
-          version: '1.0'
-        paths:
-          /devices/{deviceId}:
-            get:
-              parameters:
-                - name: deviceId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                    format: uuid
-              responses:
-                '200':
-                  description: Successful response
-                  content:
-                    application/json:
-                      schema:
-                        type: object
-                        properties:
-                          message:
-                            type: string
-                          deviceId:
-                            type: string
-                          data:
-                            type: array
-                            items:
-                              type: object
-                '400':
-                  description: Invalid device ID
-                '500':
-                  description: Server error
 
 Outputs:
   TimestreamWriterFunction:
